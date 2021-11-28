@@ -26,6 +26,11 @@ namespace TvMaze.OuterApi.Controllers
         {
             try
             {
+                if (page <= 0)
+                {
+                    throw new Exception("Invalid page number.");
+                }
+
                 int pageNumber = page ?? 1;
                 int skip = (pageNumber - 1) * PAGE_SIZE;
 
@@ -39,26 +44,33 @@ namespace TvMaze.OuterApi.Controllers
                 return Ok(data);
             } catch(Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest($"Error: {ex.Message} : {ex.InnerException}");
             }
 
         }
         
-
         [HttpGet("{id?}")]
         public async Task<IActionResult> Get(int id)
         {
-            int pageNumber = 1;
-            int skip = (pageNumber - 1) * PAGE_SIZE;
+            try
+            {
 
-            var showData = await _repository.GetShowsWithCast(skip, PAGE_SIZE, id);
+                int pageNumber = 1;
+                int skip = (pageNumber - 1) * PAGE_SIZE;
 
-            var data = showData.
-            Select(s => new ShowModel(s.Id, s.Name,
-            s.Cast.Select(c => new CastModel(c.Id, c.Name)).ToList()))
-            .ToList();
+                var showData = await _repository.GetShowsWithCast(skip, PAGE_SIZE, id);
+
+                var data = showData.
+                Select(s => new ShowModel(s.Id, s.Name,
+                s.Cast.Select(c => new CastModel(c.Id, c.Name)).ToList()))
+                .ToList();
 
             return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message} : {ex.InnerException}");
+            }
         }
 
     }
